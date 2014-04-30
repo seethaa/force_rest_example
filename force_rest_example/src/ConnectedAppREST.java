@@ -1,11 +1,8 @@
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,10 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -26,15 +21,18 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.apache.http.NameValuePair;  
 
 
 @WebServlet(urlPatterns = { "/ConnectedAppREST" })
+/**
+ * Demo for Connect App/REST 
+ * @author seetha
+ *
+ */
 public class ConnectedAppREST extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
@@ -56,8 +54,6 @@ public class ConnectedAppREST extends HttpServlet {
 			builder.setParameter("q", "SELECT Name, Id from Account LIMIT 100");
 
 			httpGet.setURI(builder.build());
-
-			//httpclient.execute(httpGet);
 
 			CloseableHttpResponse closeableresponse = httpclient.execute(httpGet);  
 			System.out.println("Response Status line :" + closeableresponse.getStatusLine());  
@@ -249,29 +245,11 @@ public class ConnectedAppREST extends HttpServlet {
 			throw new ServletException(e);
 		}
 
-		//		PostMethod patch = new PostMethod(instanceUrl
-		//				+ "/services/data/v30.0/sobjects/Account/" + accountId) {
-		//			@Override
-		//			public String getName() {
-		//				return "PATCH";
-		//			}
-		//		};
-		//
-		//		patch.setRequestHeader("Authorization", "OAuth " + accessToken);
-		//		patch.setRequestEntity(new StringRequestEntity(update.toString(),
-		//				"application/json", null));
-
 		HttpPost httpost = new HttpPost(instanceUrl
 				+ "/services/data/v30.0/sobjects/Account/" +accountId+"?_HttpMethod=PATCH");  
 
 
 		httpost.addHeader("Authorization", "OAuth " + accessToken);
-
-		//		List<NameValuePair> nvps = new ArrayList<NameValuePair>();  
-		//		nvps.add(new BasicNameValuePair("Name", newName));  
-		//		nvps.add(new BasicNameValuePair("BillingCity",city)); 
-
-		//		httpost.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));
 
 
 		StringEntity messageEntity = new StringEntity( update.toString(),

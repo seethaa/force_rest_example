@@ -2,7 +2,6 @@
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -29,20 +28,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+
+	@WebServlet(name = "oauth", urlPatterns = { "/oauth/*", "/oauth" }, initParams = {
+		// clientId is 'Consumer Key' in the Remote Access UI
+//**Update with your own Client ID
+	@WebInitParam(name = "clientId", value = "3MVG9JZ_r.QzrS7jzujCYrebr8kajDEcjXQLXnV9nGU6PaxOjuOi_n8EcUf0Ix9qqk1lYCa4_Jaq7mpqxi2YT"),
+		// clientSecret is 'Consumer Secret' in the Remote Access UI
+//**Update with your own Client Secret
+	@WebInitParam(name = "clientSecret", value = "2307033558641049067"),
+		// This must be identical to 'Callback URL' in the Remote Access UI
+//**Update with your own URI
+	@WebInitParam(name = "redirectUri", value = "http://localhost:8080/force_rest_example/oauth/_callback"),
+	@WebInitParam(name = "environment", value = "https://login.salesforce.com"), })
+	
 /**
  * Servlet parameters
+ * @author seetha
+ *
  */
-@WebServlet(name = "oauth", urlPatterns = { "/oauth/*", "/oauth" }, initParams = {
-		// clientId is 'Consumer Key' in the Remote Access UI
-		//**Update with your own Client ID
-		@WebInitParam(name = "clientId", value = "3MVG9JZ_r.QzrS7jzujCYrebr8kajDEcjXQLXnV9nGU6PaxOjuOi_n8EcUf0Ix9qqk1lYCa4_Jaq7mpqxi2YT"),
-		// clientSecret is 'Consumer Secret' in the Remote Access UI
-		//**Update with your own Client Secret
-		@WebInitParam(name = "clientSecret", value = "2307033558641049067"),
-		// This must be identical to 'Callback URL' in the Remote Access UI
-		//**Update with your own URI
-		@WebInitParam(name = "redirectUri", value = "http://localhost:8080/force_rest_example/oauth/_callback"),
-		@WebInitParam(name = "environment", value = "https://login.salesforce.com"), })
 public class OAuthConnectedApp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -85,7 +88,6 @@ public class OAuthConnectedApp extends HttpServlet {
 
 			if (request.getRequestURI().endsWith("oauth")) {
 
-				System.out.println("NEED 2 AUTHORIZE!");
 				// we need to send the user to authorize
 				response.sendRedirect(authUrl);
 				return;
