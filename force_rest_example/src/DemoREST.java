@@ -1,12 +1,9 @@
-
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +32,7 @@ public class DemoREST extends HttpServlet {
 			PrintWriter writer) throws ServletException, IOException {
 		HttpClient httpclient = new HttpClient();
 		GetMethod get = new GetMethod(instanceUrl
-				+ "/services/data/v20.0/query");
+				+ "/services/data/v30.0/query");
 
 		// set the token in the header
 		get.setRequestHeader("Authorization", "OAuth " + accessToken);
@@ -59,7 +56,7 @@ public class DemoREST extends HttpServlet {
 					System.out.println("Query response: "
 							+ response.toString(2));
 
-					writer.write(response.getString("totalSize")
+					writer.write(response.getInt("totalSize")
 							+ " record(s) returned\n\n");
 
 					JSONArray results = response.getJSONArray("records");
@@ -98,7 +95,7 @@ public class DemoREST extends HttpServlet {
 		}
 
 		PostMethod post = new PostMethod(instanceUrl
-				+ "/services/data/v20.0/sobjects/Account/");
+				+ "/services/data/v30.0/sobjects/Account/");
 
 		post.setRequestHeader("Authorization", "OAuth " + accessToken);
 		post.setRequestEntity(new StringRequestEntity(account.toString(),
@@ -124,7 +121,7 @@ public class DemoREST extends HttpServlet {
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
-					//throw new ServletException(e);
+					// throw new ServletException(e);
 				}
 			}
 		} finally {
@@ -139,7 +136,7 @@ public class DemoREST extends HttpServlet {
 			IOException {
 		HttpClient httpclient = new HttpClient();
 		GetMethod get = new GetMethod(instanceUrl
-				+ "/services/data/v20.0/sobjects/Account/" + accountId);
+				+ "/services/data/v30.0/sobjects/Account/" + accountId);
 
 		// set the token in the header
 		get.setRequestHeader("Authorization", "OAuth " + accessToken);
@@ -159,7 +156,13 @@ public class DemoREST extends HttpServlet {
 					Iterator iterator = response.keys();
 					while (iterator.hasNext()) {
 						String key = (String) iterator.next();
-						String value = response.getString(key);
+
+						Object obj = response.get(key);
+						String value = null;
+						if (obj instanceof String) {
+							value = (String) obj;
+						}
+
 						writer.write(key + ":" + (value != null ? value : "")
 								+ "\n");
 					}
@@ -177,7 +180,7 @@ public class DemoREST extends HttpServlet {
 
 	private void updateAccount(String accountId, String newName, String city,
 			String instanceUrl, String accessToken, PrintWriter writer)
-					throws ServletException, IOException {
+			throws ServletException, IOException {
 		HttpClient httpclient = new HttpClient();
 
 		JSONObject update = new JSONObject();
@@ -191,7 +194,7 @@ public class DemoREST extends HttpServlet {
 		}
 
 		PostMethod patch = new PostMethod(instanceUrl
-				+ "/services/data/v20.0/sobjects/Account/" + accountId) {
+				+ "/services/data/v30.0/sobjects/Account/" + accountId) {
 			@Override
 			public String getName() {
 				return "PATCH";
@@ -216,7 +219,7 @@ public class DemoREST extends HttpServlet {
 		HttpClient httpclient = new HttpClient();
 
 		DeleteMethod delete = new DeleteMethod(instanceUrl
-				+ "/services/data/v20.0/sobjects/Account/" + accountId);
+				+ "/services/data/v30.0/sobjects/Account/" + accountId);
 
 		delete.setRequestHeader("Authorization", "OAuth " + accessToken);
 
@@ -233,6 +236,7 @@ public class DemoREST extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter writer = response.getWriter();
@@ -255,12 +259,11 @@ public class DemoREST extends HttpServlet {
 
 		String accountId = createAccount("My New Org", instanceUrl,
 				accessToken, writer);
-		
-		if (accountId ==null){
-			System.out.println("ACCOUNT ID IS NULL");
+
+		if (accountId == null) {
+			System.out.println("Account ID null");
 		}
 		showAccount(accountId, instanceUrl, accessToken, writer);
-
 		showAccounts(instanceUrl, accessToken, writer);
 
 		updateAccount(accountId, "My New Org, Inc", "San Francisco",

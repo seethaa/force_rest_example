@@ -23,10 +23,13 @@ import org.json.JSONTokener;
  */
 @WebServlet(name = "oauth", urlPatterns = { "/oauth/*", "/oauth" }, initParams = {
 		// clientId is 'Consumer Key' in the Remote Access UI
-		@WebInitParam(name = "clientId", value = "3MVG9JZ_r.QzrS7jjFXuahopprKaqXyhYIL9pLd8z3h9gb_XWW_Hf0dtaoS7eyF.qE.pHdivvxdcg6u3IZQlF"),
+		//**Update with your own Client ID
+		@WebInitParam(name = "clientId", value = "3MVG9JZ_r.QzrS7jzujCYrebr8kajDEcjXQLXnV9nGU6PaxOjuOi_n8EcUf0Ix9qqk1lYCa4_Jaq7mpqxi2YT"),
 		// clientSecret is 'Consumer Secret' in the Remote Access UI
-		@WebInitParam(name = "clientSecret", value = "2865535295985663290"),
+		//**Update with your own Client Secret
+		@WebInitParam(name = "clientSecret", value = "2307033558641049067"),
 		// This must be identical to 'Callback URL' in the Remote Access UI
+		//**Update with your own URI
 		@WebInitParam(name = "redirectUri", value = "http://localhost:8080/force_rest_example/oauth/_callback"),
 		@WebInitParam(name = "environment", value = "https://login.salesforce.com"), })
 public class OAuthServlet extends HttpServlet {
@@ -65,12 +68,12 @@ public class OAuthServlet extends HttpServlet {
 		String accessToken = (String) request.getSession().getAttribute(
 				ACCESS_TOKEN);
 
-			System.out.println("calling doget");
+		//System.out.println("calling doget");
 		if (accessToken == null) {
 			String instanceUrl = null;
 
 			if (request.getRequestURI().endsWith("oauth")) {
-				
+
 				System.out.println("NEED 2 AUTHORIZE!");
 				// we need to send the user to authorize
 				response.sendRedirect(authUrl);
