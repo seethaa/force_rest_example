@@ -1,9 +1,12 @@
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
@@ -12,8 +15,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.Consts;  
+import org.apache.http.HttpEntity;  
+import org.apache.http.NameValuePair;  
+import org.apache.http.client.entity.UrlEncodedFormEntity;  
+import org.apache.http.client.methods.CloseableHttpResponse;  
+import org.apache.http.client.methods.HttpPost;  
+import org.apache.http.impl.client.CloseableHttpClient;  
+import org.apache.http.impl.client.HttpClients;  
+import org.apache.http.message.BasicNameValuePair;  
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -32,7 +43,7 @@ import org.json.JSONTokener;
 		//**Update with your own URI
 		@WebInitParam(name = "redirectUri", value = "http://localhost:8080/force_rest_example/oauth/_callback"),
 		@WebInitParam(name = "environment", value = "https://login.salesforce.com"), })
-public class OAuthServlet extends HttpServlet {
+public class OAuthConnectedApp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
@@ -83,36 +94,52 @@ public class OAuthServlet extends HttpServlet {
 
 				String code = request.getParameter("code");
 
-				HttpClient httpclient = new HttpClient();
 
-				PostMethod post = new PostMethod(tokenUrl);
-				post.addParameter("code", code);
-				post.addParameter("grant_type", "authorization_code");
-				post.addParameter("client_id", clientId);
-				post.addParameter("client_secret", clientSecret);
-				post.addParameter("redirect_uri", redirectUri);
+				// Create an instance of HttpClient.
+				CloseableHttpClient httpclient = HttpClients.createDefault();  
 
-				try {
-					httpclient.executeMethod(post);
+				try{
+					// Create an instance of HttpPost.  
+					HttpPost httpost = new HttpPost(tokenUrl);  
 
-					try {
+					// Adding all form parameters in a List of type NameValuePair  
+
+					List<NameValuePair> nvps = new ArrayList<NameValuePair>();  
+					nvps.add(new BasicNameValuePair("code", code));  
+					nvps.add(new BasicNameValuePair("grant_type","authorization_code")); 
+					nvps.add(new BasicNameValuePair("client_id", clientId)); 
+					nvps.add(new BasicNameValuePair("client_secret", clientSecret)); 
+					nvps.add(new BasicNameValuePair("redirect_uri", redirectUri)); 
+
+					httpost.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));
+
+
+					// Execute the request.  
+					CloseableHttpResponse closeableresponse = httpclient.execute(httpost);  
+					System.out.println("Response Status line :" + closeableresponse.getStatusLine());  
+					try {  
+						// Do the needful with entity.  
+						HttpEntity entity = closeableresponse.getEntity(); 
+						InputStream rstream = entity.getContent();
 						JSONObject authResponse = new JSONObject(
-								new JSONTokener(new InputStreamReader(
-										post.getResponseBodyAsStream())));
-						System.out.println("Auth response: "
-								+ authResponse.toString(2));
-
+								new JSONTokener(rstream));
+						
 						accessToken = authResponse.getString("access_token");
 						instanceUrl = authResponse.getString("instance_url");
-
-						System.out.println("Got access token: " + accessToken);
+						
+						
 					} catch (JSONException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
-						throw new ServletException(e);
-					}
-				} finally {
-					post.releaseConnection();
-				}
+					} finally {  
+						// Closing the response  
+						closeableresponse.close();  
+					}  
+				} finally {  
+					httpclient.close();  
+				}  
+
+
 			}
 
 			// Set a session attribute so that other servlets can get the access
@@ -124,6 +151,6 @@ public class OAuthServlet extends HttpServlet {
 			request.getSession().setAttribute(INSTANCE_URL, instanceUrl);
 		}
 
-		response.sendRedirect(request.getContextPath() + "/DemoREST");
+		response.sendRedirect(request.getContextPath() + "/ConnectedAppREST");
 	}
 }
