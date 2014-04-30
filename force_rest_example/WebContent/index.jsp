@@ -9,7 +9,6 @@
 <body>
 	<p>
 	<%
-	out.println(2+2);
 	%>
 	</p>
 </body>
